@@ -155,6 +155,29 @@ def merge_data(d_1: List[dict], d_2: List[dict], props: List[str]) -> List[dict]
     return [dict(zip(props, record)) for record in merged]
 
 
+def write_merged_data_to_file(merged: List[dict], out_file: str) -> None:
+    """Write the merged data to the output file.
+
+    Args:
+        merged (List[dict]): The merged data.
+        out_file (str): The name of the output file.
+    """
+    # Write the merged data to the output file
+    try:
+        with open(out_file, 'w', encoding='utf-8') as file:
+            file.write('<?xml version="1.0" encoding="UTF-8"?>\n')
+            file.write('<data>\n')
+            for data in merged:
+                file.write('  <row>\n')
+                for prop, value in data.items():
+                    file.write(f'    <{prop}>{value}</{prop}>\n')
+                file.write('  </row>\n')
+            file.write('</data>\n')
+    except IOError as io_error:
+        print(f"Error writing merged data to file: {io_error}")
+        sys.exit(1)
+
+
 if __name__ == '__main__':
     logger = logging.getLogger(__name__)
 
@@ -178,3 +201,6 @@ if __name__ == '__main__':
 
     # Merge the data
     merged_data = merge_data(data1, data2, properties)
+
+    # Write the merged data to the output file
+    write_merged_data_to_file(merged_data, output_file)
