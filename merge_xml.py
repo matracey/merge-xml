@@ -2,6 +2,7 @@
 Merge two XML files based on join properties and optionally output the merged data to a new XML file.
 """
 import argparse
+import os
 import re
 
 
@@ -45,6 +46,18 @@ def has_xml_extension(filename: str) -> bool:
         bool: True if the filename has the .xml extension, False otherwise
     """
     return filename.endswith(".xml")
+
+
+def file_exists(filepath: str) -> bool:
+    """Check if the file already exists.
+
+    Args:
+        filepath (str): The file path to check
+
+    Returns:
+        bool: True if the file exists, False otherwise
+    """
+    return os.path.exists(filepath)
 
 
 def main() -> None:
