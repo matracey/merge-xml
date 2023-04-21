@@ -4,7 +4,7 @@ Merge two XML files based on join properties and optionally output the merged da
 import argparse
 import os
 import re
-from typing import List
+from typing import List, Tuple
 
 from lxml import etree
 
@@ -118,6 +118,17 @@ def validate_props_xpath(props_xpath: List[str]) -> None:
         raise ValueError(f"The following xpath strings are invalid:\n\n{error_message}")
 
 
+def parse_xml_files(xml_file: str) -> Tuple[etree._Element, etree.XMLSchema]:
+    """
+    Parse XML file that returns a tuple of the root element and the schema
+    """
+    parser = etree.XMLParser(resolve_entities=False, strip_cdata=False)
+    tree = etree.parse(xml_file, parser=parser)
+    schema_root = etree.XMLSchema(tree)
+    root = tree.getroot()
+    return root, schema_root
+
+
 def main() -> None:
     """
     Main function
@@ -131,6 +142,9 @@ def main() -> None:
     validate_output_filename(args.output)
     # Validate the xpath strings
     validate_props_xpath(args.join_properties)
+    # Parse the XML files
+    left_data, left_schema = parse_xml_files(args.left_file)
+    right_data, right_schema = parse_xml_files(args.right_file)
 
 
 if __name__ == '__main__':
