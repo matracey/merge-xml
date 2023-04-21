@@ -4,6 +4,7 @@ import logging
 import sys
 import os
 from typing import List, Tuple
+from defusedxml.ElementTree import parse
 
 
 def parse_command_line_args() -> Tuple[str, str, List[str], str]:
@@ -69,6 +70,39 @@ def validate_output_filename(out_file: str) -> List[str]:
     return file_errors
 
 
+def parse_xml_files(
+    f_1: str,
+    f_2: str,
+    props: List[str]
+) -> Tuple[List[dict], List[dict]]:
+    """Parse the XML files and return a list of dictionaries containing the specified properties.
+
+    Args:
+        f_1 (str): The name of the first XML file.
+        f_2 (str): The name of the second XML file.
+        props (List[str]): The list of properties to extract from each file.
+
+    Returns:
+        Tuple[List[dict], List[dict]]: A tuple containing the list of dictionaries for each file.
+    """
+    # Parse the XML files
+    try:
+        tree1 = parse(f_1)
+        tree2 = parse(f_2)
+    except FileNotFoundError as ex:
+        logging.error("Error parsing XML files: %s", ex)
+        sys.exit(1)
+
+    # Extract the specified properties from the XML files
+    data_1 = []
+    data_2 = []
+    for elem in tree1.getroot():
+        data_1.append({prop: elem.find(prop).text for prop in props})
+    for elem in tree2.getroot():
+        data_2.append({prop: elem.find(prop).text for prop in props})
+    return data_1, data_2
+
+
 if __name__ == '__main__':
     logger = logging.getLogger(__name__)
 
@@ -81,3 +115,6 @@ if __name__ == '__main__':
         for error in errors:
             logging.error(error)
         sys.exit(1)
+
+    # Parse the XML files
+    data1, data2 = parse_xml_files(file1, file2, properties)
