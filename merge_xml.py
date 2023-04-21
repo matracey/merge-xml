@@ -159,6 +159,30 @@ def validate_xml_data(l_data: etree._Element, l_schema: etree.XMLSchema, r_data:
         raise ValueError(f"Invalid XML data: \n\n\t{error_message}")
 
 
+def merge_data(left: etree._Element, right: etree._Element, join_properties: List[str]) -> etree._Element:
+    """Merge the data from the two XML files, uniquely identifying each record using the specified properties.
+
+    Args:
+        left_data (etree._Element): The XML data from the left file
+        right_data (etree._Element): The XML data from the right file
+        join_properties (List[str]): The properties to join on as xpath strings
+
+    Returns:
+        etree._Element: The merged XML data
+    """
+    join_dict = {}
+    for elem in right:
+        join_key = tuple(elem.find(prop).text for prop in join_properties)
+        join_dict[join_key] = elem
+    for elem in left:
+        join_key = tuple(elem.find(prop).text for prop in join_properties)
+        join_elem = join_dict.get(join_key)
+        if join_elem is not None:
+            join_dict.pop(join_key)
+    left.extend(join_dict.values())
+    return left
+
+
 def main() -> None:
     """
     Main function
@@ -177,6 +201,8 @@ def main() -> None:
     right_data, right_schema = parse_xml_files(args.right_file)
     # Validate the XML data
     validate_xml_data(left_data, left_schema, right_data, right_schema, args.join_properties)
+    # Merge the data
+    merged_data = merge_data(left_data, right_data, args.join_properties)
 
 
 if __name__ == '__main__':
