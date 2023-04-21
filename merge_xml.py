@@ -103,6 +103,35 @@ def parse_xml_files(
     return data_1, data_2
 
 
+def validate_xml_data(d_1: List[dict], d_2: List[dict], props: List[str]) -> List[str]:
+    """Validate the data from the XML files and ensure that it is valid.
+
+    Args:
+        data1_list (List[dict]): The data from the first XML file.
+        data2_list (List[dict]): The data from the second XML file.
+        properties_list (List[str]): The list of properties to extract from the XML files.
+    """
+
+    xml_errors = []
+
+    # Check if the data from the XML files is valid
+    if not d_1:
+        xml_errors.append(
+            "The first XML file is empty or could not be parsed.")
+    if not d_2:
+        xml_errors.append(
+            "The second XML file is empty or could not be parsed.")
+    for data in d_1:
+        if not all(prop in data for prop in props):
+            xml_errors.append(
+                "The first XML file does not contain all of the specified properties.")
+    for data in d_2:
+        if not all(prop in data for prop in props):
+            xml_errors.append(
+                "The second XML file does not contain all of the specified properties.")
+    return xml_errors
+
+
 if __name__ == '__main__':
     logger = logging.getLogger(__name__)
 
@@ -111,10 +140,15 @@ if __name__ == '__main__':
 
     # Validate the output file name
     errors = validate_output_filename(output_file)
+
+    if not errors:
+        # Parse the XML files
+        data1, data2 = parse_xml_files(file1, file2, properties)
+
+        # Validate the XML data
+        errors = validate_xml_data(data1, data2, properties)
+
     if errors:
         for error in errors:
             logging.error(error)
         sys.exit(1)
-
-    # Parse the XML files
-    data1, data2 = parse_xml_files(file1, file2, properties)
