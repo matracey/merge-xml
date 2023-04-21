@@ -60,6 +60,18 @@ def file_exists(filepath: str) -> bool:
     return os.path.exists(filepath)
 
 
+def is_writable_directory(directory: str) -> bool:
+    """Check if the directory is writable.
+
+    Args:
+        directory (str): The directory to check
+
+    Returns:
+        bool: True if the directory is writable, False otherwise
+    """
+    return os.access(directory, os.W_OK)
+
+
 def main() -> None:
     """
     Main function
