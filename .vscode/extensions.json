@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "editorconfig.editorconfig",
+    "kevinrose.vsc-python-indent",
+    "littlefoxteam.vscode-python-test-adapter",
+    "ms-python.python-type-hint",
+    "ms-python.python",
+    "njjp.vscode-python-docstring"
+  ]
+}
