@@ -24,6 +24,33 @@ def parse_command_line_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def validate_output_filename(out_path: str) -> None:
+    """Validate the output file name and ensure that it is valid, writable and doesn't already exist.
+
+    Args:
+        out_file (str): The output file path
+
+    Raises:
+        ValueError: If the output file name is invalid or already exists
+    """
+
+    # Check if the output file name contains any invalid characters
+    if not is_valid_filename(out_path):
+        raise ValueError("The output file name contains invalid characters.")
+
+    # Check if the output file name has the .xml extension
+    if not has_xml_extension(out_path):
+        raise ValueError("The output file name must have the .xml extension.")
+
+    # Check that the output file doesn't already exist
+    if file_exists(out_path):
+        raise ValueError("The output file already exists.")
+
+    # Check that the output directory is writable
+    if not is_writable_directory(os.path.dirname(out_path)):
+        raise ValueError("The output directory is not writable.")
+
+
 def is_valid_filename(filename: str) -> bool:
     """Check if the filename contains any invalid characters.
 
@@ -78,6 +105,11 @@ def main() -> None:
     """
     # Parse the command line arguments
     args = parse_command_line_args()
+    # Normalize the output file name if it is provided
+    if args.output is not None:
+        args.output = os.path.abspath(os.path.normpath(args.output))
+    # Validate the output file name
+    validate_output_filename(args.output)
 
 
 if __name__ == '__main__':
