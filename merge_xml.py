@@ -35,6 +35,18 @@ def is_valid_filename(filename: str) -> bool:
     return re.compile(r"[^*?<>|]+").fullmatch(filename) is not None
 
 
+def has_xml_extension(filename: str) -> bool:
+    """Check if the filename has the .xml extension.
+
+    Args:
+        filename (str): The filename to check
+
+    Returns:
+        bool: True if the filename has the .xml extension, False otherwise
+    """
+    return filename.endswith(".xml")
+
+
 def main() -> None:
     """
     Main function
