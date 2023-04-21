@@ -132,6 +132,29 @@ def validate_xml_data(d_1: List[dict], d_2: List[dict], props: List[str]) -> Lis
     return xml_errors
 
 
+def merge_data(d_1: List[dict], d_2: List[dict], props: List[str]) -> List[dict]:
+    """Merge the data from the two XML files, uniquely identifying each record using the specified properties.
+
+    Args:
+        d_1 (List[dict]): The data from the first XML file.
+        d_2 (List[dict]): The data from the second XML file.
+        props (List[str]): The list of properties that uniquely identify each record.
+
+    Returns:
+        List[dict]: The merged data.
+    """
+    # Merge the data based on the specified properties
+    merged = set()
+    for left in d_1:
+        merged.add(tuple(left[prop] for prop in props))
+    for right in d_2:
+        # Check if the record already exists
+        if tuple(right[prop] for prop in props) not in merged:
+            merged.add(tuple(right[prop] for prop in props))
+    # Convert the merged data back to a list of dictionaries
+    return [dict(zip(props, record)) for record in merged]
+
+
 if __name__ == '__main__':
     logger = logging.getLogger(__name__)
 
@@ -152,3 +175,6 @@ if __name__ == '__main__':
         for error in errors:
             logging.error(error)
         sys.exit(1)
+
+    # Merge the data
+    merged_data = merge_data(data1, data2, properties)
