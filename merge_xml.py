@@ -2,6 +2,7 @@
 Merge two XML files based on join properties and optionally output the merged data to a new XML file.
 """
 import argparse
+import re
 
 
 def parse_command_line_args() -> argparse.Namespace:
@@ -20,6 +21,18 @@ def parse_command_line_args() -> argparse.Namespace:
     parser.add_argument('-o', '--output', help='Path to the output XML file', default=None)
 
     return parser.parse_args()
+
+
+def is_valid_filename(filename: str) -> bool:
+    """Check if the filename contains any invalid characters.
+
+    Args:
+        filename (str): The filename to check
+
+    Returns:
+        bool: True if the filename is valid, False otherwise
+    """
+    return re.compile(r"[^*?<>|]+").fullmatch(filename) is not None
 
 
 def main() -> None:
