@@ -183,6 +183,26 @@ def merge_data(left: etree._Element, right: etree._Element, join_properties: Lis
     return left
 
 
+def write_merged_data_to_file(xml_data: etree._Element, output_file: str = None) -> None:
+    """
+    Write the merged data to the output file.
+
+    Args:
+        xml_data (etree._Element): The merged XML data
+        output_file (str, optional): The output file path. Defaults to None.
+    """
+    # Write the merged data to the output file
+    if output_file:
+        try:
+            with open(output_file, 'wb') as file:
+                file.write(etree.tostring(
+                    xml_data, encoding='utf-8', xml_declaration=True))
+        except IOError as io_error:
+            raise IOError(f'Unable to write to output file {output_file}') from io_error
+    else:
+        print(etree.tostring(xml_data, encoding='unicode'))
+
+
 def main() -> None:
     """
     Main function
@@ -203,6 +223,8 @@ def main() -> None:
     validate_xml_data(left_data, left_schema, right_data, right_schema, args.join_properties)
     # Merge the data
     merged_data = merge_data(left_data, right_data, args.join_properties)
+    # Write the merged data to the output file
+    write_merged_data_to_file(merged_data, args.output)
 
 
 if __name__ == '__main__':
