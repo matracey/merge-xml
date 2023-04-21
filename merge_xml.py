@@ -129,6 +129,36 @@ def parse_xml_files(xml_file: str) -> Tuple[etree._Element, etree.XMLSchema]:
     return root, schema_root
 
 
+def validate_xml_data(l_data: etree._Element, l_schema: etree.XMLSchema, r_data: etree._Element, r_schema: etree.XMLSchema, join_props_xpath: List[str]) -> None:
+    """
+    Validate XML data
+
+    Args:
+        left_data (etree._Element): The XML data from the left file
+        right_data (etree._Element): The XML data from the right file
+        join_properties (List[str]): The properties to join on as xpath strings
+
+    Raises:
+        ValueError: If the XML schema does not match between the files
+        ValueError: If the join properties do not match to at least one element in both left_data and right_data
+    """
+    errors = []
+    # Test the left schema against the right data and vice versa
+    if not l_schema.validate(r_data):
+        errors.append('Left schema does not match right data')
+    if not r_schema.validate(l_data):
+        errors.append('Right schema does not match left data')
+    # Test the join properties exist in both files
+    for prop in join_props_xpath:
+        left_prop = l_data.xpath(prop)
+        right_prop = r_data.xpath(prop)
+        if not left_prop or not right_prop:
+            errors.append('Join property {prop} does not match to at least one element in both files')
+    if errors:
+        error_message = "\n\t".join(errors)
+        raise ValueError(f"Invalid XML data: \n\n\t{error_message}")
+
+
 def main() -> None:
     """
     Main function
@@ -145,6 +175,8 @@ def main() -> None:
     # Parse the XML files
     left_data, left_schema = parse_xml_files(args.left_file)
     right_data, right_schema = parse_xml_files(args.right_file)
+    # Validate the XML data
+    validate_xml_data(left_data, left_schema, right_data, right_schema, args.join_properties)
 
 
 if __name__ == '__main__':
