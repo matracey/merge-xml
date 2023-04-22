@@ -4,6 +4,9 @@ Merge two XML files based on join properties and optionally output the merged da
 import argparse
 import os
 import re
+from typing import List
+
+from lxml import etree
 
 
 def parse_command_line_args() -> argparse.Namespace:
@@ -99,6 +102,22 @@ def is_writable_directory(directory: str) -> bool:
     return os.access(directory, os.W_OK)
 
 
+def validate_props_xpath(props_xpath: List[str]) -> None:
+    """
+    Checks that each xpath string is valid using lxml.
+    If not, throws an error listing each invalid xpath string.
+    """
+    invalid_props = []
+    for prop in props_xpath:
+        try:
+            etree.XPath(prop)
+        except etree.XPathSyntaxError as ex:
+            invalid_props.append(f"{prop}: {ex}")
+    if invalid_props:
+        error_message = "\n".join(invalid_props)
+        raise ValueError(f"The following xpath strings are invalid:\n\n{error_message}")
+
+
 def main() -> None:
     """
     Main function
@@ -110,6 +129,8 @@ def main() -> None:
         args.output = os.path.abspath(os.path.normpath(args.output))
     # Validate the output file name
     validate_output_filename(args.output)
+    # Validate the xpath strings
+    validate_props_xpath(args.join_properties)
 
 
 if __name__ == '__main__':
