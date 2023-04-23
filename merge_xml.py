@@ -206,28 +206,19 @@ def validate_xml_data(l_data: etree._Element, l_schema: etree.XMLSchema, r_data:
         raise ValueError(f"Invalid XML data: \n\n\t{error_message}")
 
 
-def merge_data(left: etree._Element, right: etree._Element, join_properties: List[str]) -> etree._Element:
+def merge_data(left: etree._Element, right: etree._Element, join_properties: List[str], merge_strategy: MergeStrategy = LeftOuterJoinStrategy()) -> etree._Element:
     """Merge the data from the two XML files, uniquely identifying each record using the specified properties.
 
     Args:
         left_data (etree._Element): The XML data from the left file
         right_data (etree._Element): The XML data from the right file
         join_properties (List[str]): The properties to join on as xpath strings
+        merge_strategy (MergeStrategy): The merge strategy to use. Defaults to LeftOuterJoinnStrategy.
 
     Returns:
         etree._Element: The merged XML data
     """
-    join_dict = {}
-    for elem in right:
-        join_key = tuple(elem.find(prop).text for prop in join_properties)
-        join_dict[join_key] = elem
-    for elem in left:
-        join_key = tuple(elem.find(prop).text for prop in join_properties)
-        join_elem = join_dict.get(join_key)
-        if join_elem is not None:
-            join_dict.pop(join_key)
-    left.extend(join_dict.values())
-    return left
+    return merge_strategy.merge(left, right, join_properties)
 
 
 def write_merged_data_to_file(xml_data: etree._Element, output_file: str = None) -> None:
