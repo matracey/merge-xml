@@ -70,6 +70,8 @@ def parse_command_line_args() -> argparse.Namespace:
     parser.add_argument('join_properties', nargs='+', help='List of join properties as xpath strings')
     # Optional output file name
     parser.add_argument('-o', '--output', help='Path to the output XML file', default=None)
+    # Optional merge strategy
+    parser.add_argument('-s', '--strategy', help='Merge strategy', choices=['left', 'right'], default='left')
 
     return parser.parse_args()
 
@@ -259,8 +261,12 @@ def main() -> None:
     right_data, right_schema = parse_xml_files(args.right_file)
     # Validate the XML data
     validate_xml_data(left_data, left_schema, right_data, right_schema, args.join_properties)
-    # Merge the data
-    merged_data = merge_data(left_data, right_data, args.join_properties)
+    # Merge the data, using the args.strategy to specify the merge strategy
+    if args.strategy == 'right':
+        merge_strategy = RightOuterJoinStrategy()
+    else:
+        merge_strategy = LeftOuterJoinStrategy()
+    merged_data = merge_data(left_data, right_data, args.join_properties, merge_strategy)
     # Write the merged data to the output file
     write_merged_data_to_file(merged_data, args.output)
 
