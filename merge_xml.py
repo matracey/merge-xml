@@ -9,6 +9,17 @@ from typing import List, Tuple
 from lxml import etree
 
 
+class MergeStrategy:
+    """
+    MergeStrategy is an abstract class that defines the merge method.
+    """
+    def merge(self, left: etree._Element, right: etree._Element, join_properties: List[str]) -> etree._Element:
+        """
+        Merge two element trees based on join properties.
+        """
+        raise NotImplementedError
+
+
 def parse_command_line_args() -> argparse.Namespace:
     """Parse the command line arguments and return the file names, properties, and output file name.
 
