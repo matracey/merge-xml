@@ -20,6 +20,24 @@ class MergeStrategy:
         raise NotImplementedError
 
 
+class LeftOuterJoinStrategy(MergeStrategy):
+    """
+    LeftOuterJoinStrategy is a concrete class that defines the merge method. It merges the two XML files using a left outer join strategy.
+    """
+    def merge(self, left: etree._Element, right: etree._Element, join_properties: List[str]) -> etree._Element:
+        join_dict = {}
+        for elem in right:
+            join_key = tuple(elem.find(prop).text for prop in join_properties)
+            join_dict[join_key] = elem
+        for elem in left:
+            join_key = tuple(elem.find(prop).text for prop in join_properties)
+            join_elem = join_dict.get(join_key)
+            if join_elem is not None:
+                join_dict.pop(join_key)
+        left.extend(join_dict.values())
+        return left
+
+
 def parse_command_line_args() -> argparse.Namespace:
     """Parse the command line arguments and return the file names, properties, and output file name.
 
